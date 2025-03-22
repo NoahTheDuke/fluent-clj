@@ -2,16 +2,11 @@
   #?(:clj (:refer-clojure :exclude [format]))
   (:require
    #?(:clj [noahtheduke.fluent.impl.clojure :as impl]
-      :cljs [noahtheduke.fluent.impl.clojurescript :as impl]))
-  #?(:clj (:import
-           (fluent.bundle FluentBundle))))
-
-#?(:clj (set! *warn-on-reflection* true))
+      :cljs [noahtheduke.fluent.impl.clojurescript :as impl])))
 
 (defn build
   "Create a new FluentBundle for the given locale with the provided resource."
-  #?(:clj ^FluentBundle [locale-str resource]
-     :cljs [locale-str resource])
+  [locale-str resource]
   (impl/build locale-str resource))
 
 (defn add-resource
