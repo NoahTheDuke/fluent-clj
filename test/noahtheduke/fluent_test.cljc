@@ -23,12 +23,10 @@ email-cnt = {$cnt ->
 goodbye = Goodbye world!
 ")
 
-(def error-class
-  #?(:clj Exception :cljs js/Error))
-
 (deftest build-test
   (is (instance? FluentBundle (sut/build "en" simple-resource)))
-  (is (thrown? error-class (sut/build "DOES-NOT-MATCH" simple-resource))))
+  (is (thrown? #?(:clj Exception :cljs js/Error)
+               (sut/build "DOES-NOT-MATCH" simple-resource))))
 
 (deftest add-resource-test
   (let [original (sut/build "en" simple-resource)
@@ -39,7 +37,7 @@ goodbye = Goodbye world!
 (deftest format-test
   (let [bundle (sut/build "en" simple-resource)]
     #?(:clj (testing "throws if asked for the wrong name"
-              (is (thrown-with-msg? error-class
+              (is (thrown-with-msg? #?(:clj Exception :cljs js/Error)
                     #"Missing message for id: 'missing'"
                     (sut/format bundle "missing")))))
     (testing "can handle strings, keywords, and symbols"
@@ -48,10 +46,10 @@ goodbye = Goodbye world!
       (is (= "Hello world!" (sut/format bundle :hello))))
     (testing "can take args"
       (testing "and requires used args"
-        (is (thrown-with-msg? error-class
+        (is (thrown-with-msg? #?(:clj Exception :cljs js/Error)
               #"Error in id: 'email-cnt'"
               (sut/format bundle :email-cnt)))
-        (is (thrown-with-msg? error-class
+        (is (thrown-with-msg? #?(:clj Exception :cljs js/Error)
               #"Error in id: 'email-cnt'"
               (sut/format bundle :email-cnt {}))))
       (is (= "Welcome, Noah!"(sut/format bundle :welcome {"user" "Noah"})))
