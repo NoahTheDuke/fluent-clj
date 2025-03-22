@@ -77,7 +77,7 @@ jobs:
       - name: Setup Clojure
         uses: DeLaGuardo/setup-clojure@13.1
         with:
-          lein: 2.9.5
+          cli: 1.11.4.1474
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
