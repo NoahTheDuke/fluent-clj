@@ -1,0 +1,10 @@
+{
+    "name": "fluent-clj",
+    "version": "0.0.1",
+    "dependencies": {
+        "@fluent/bundle": "0.18.0"
+    },
+    "devDependencies": {
+        "shadow-cljs": "2.28.21"
+    }
+}

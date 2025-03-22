@@ -1,0 +1,29 @@
+{:paths ["src" "resources"]
+ :deps {org.clojure/clojure {:mvn/version "1.12.0"}
+        net.xyzsd.fluent/fluent-base {:mvn/version "0.70"}
+        net.xyzsd.fluent/fluent-functions-cldr {:mvn/version "0.70"}}
+ :aliases
+ {:dev {:extra-paths ["dev"]
+        :extra-deps {criterium/criterium {:mvn/version "0.4.6"}
+                     com.clojure-goes-fast/clj-java-decompiler {:mvn/version "0.3.6"}}}
+
+  :test {:extra-paths ["test"]}
+
+  :runner {:extra-deps {io.github.cognitect-labs/test-runner 
+                        {:git/tag "v0.5.1" :git/sha "dfb30dd"}}
+           :main-opts ["-m" "cognitect.test-runner"]}
+
+  :cljs {:extra-deps {thheller/shadow-cljs {:mvn/version "2.28.21"}}}
+
+  :splint {:extra-deps {io.github.noahtheduke/splint {:mvn/version "1.19.0"}}
+           :main-opts ["-m" "noahtheduke.splint"]}
+
+  ;; I like nrepl and rebel-readline.
+  :repl {:extra-deps {nrepl/nrepl {:mvn/version "1.2.0"}
+                      cider/cider-nrepl {:mvn/version "0.50.2"}
+                      com.bhauman/rebel-readline {:mvn/version "0.1.5"}}
+         :main-opts  ["-m" "nrepl.cmdline"
+                      "--middleware" "[cider.nrepl/cider-middleware]"
+                      "--interactive"
+                      "-f" "rebel-readline.main/-main"]}
+  }}
