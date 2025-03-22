@@ -30,14 +30,14 @@
     (add-resource bundle resource)))
 
 (defn format
-  ([bundle entry] (format bundle entry nil))
-  ([^FluentBundle bundle entry args]
-   (let [entry (clj->js entry)
-         message (.getMessage bundle entry)]
+  ([bundle id] (format bundle id nil))
+  ([^FluentBundle bundle id args]
+   (let [id (clj->js id)
+         message (.getMessage bundle id)]
      (when-let [v (and message (.-value message))]
        (try (.formatPattern bundle v (clj->js args))
             (catch js/ReferenceError e
-              (set! (.-message e) (str "Error in id: '" entry "'"))
+              (set! (.-message e) (str "Error in id: '" id "'"))
               (throw e)))))))
 
 (comment

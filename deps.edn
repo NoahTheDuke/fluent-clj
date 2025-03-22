@@ -26,4 +26,16 @@
                       "--middleware" "[cider.nrepl/cider-middleware]"
                       "--interactive"
                       "-f" "rebel-readline.main/-main"]}
+
+  :clein {:deps {io.github.noahtheduke/clein {:local/root "../clein"}}
+          :main-opts ["-m" "noahtheduke.clein"]}
+  :clein/build
+  {:lib io.github.noahtheduke/fluent-clj
+   :main fluent-clj.main
+   :url "https://github.com/noahtheduke/fluent-clj"
+   :version "./resources/FLUENTCLJ_VERSION"
+   :license {:name "MPL-2.0"
+             :url "https://mozilla.org/MPL/2.0"}
+   :src-dirs ["src"]
+   :resource-dirs ["resources"]}
   }}
