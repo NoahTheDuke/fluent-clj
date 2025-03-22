@@ -7,7 +7,7 @@ jobs:
     if: "!contains(github.event.head_commit.message, 'skip ci')"
     strategy:
       matrix:
-        java: [11, 17, 21]
+        java: [17, 21]
 
     runs-on: ubuntu-latest
     name: Clojure (Java ${{ matrix.jdk }})
