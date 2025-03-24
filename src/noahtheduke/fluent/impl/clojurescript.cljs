@@ -36,7 +36,7 @@
          message (.getMessage bundle id)]
      (when-let [v (and message (.-value message))]
        (try (.formatPattern bundle v (clj->js args))
-            (catch js/ReferenceError e
+            (catch :default e
               (set! (.-message e) (str "Error in id: '" id "'"))
               (println e)))))))
 
