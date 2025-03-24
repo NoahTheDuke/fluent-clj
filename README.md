@@ -1,6 +1,8 @@
 # fluent-clj
 
-[Project Fluent](https://projectfluent.org/) is very cool. Each of the available packages is relatively easy to use through interop, but without a unified interface, it's hard to write consistent and testable code.
+[Project Fluent](https://projectfluent.org/) is very cool. The available [Java](https://github.com/xyzsd/fluent) and [Javascript](https://github.com/projectfluent/fluent.js) packages are relatively easy to use through interop, but without a unified interface, it's hard to write consistent and testable code.
+
+This library aims to paper over those differences, making it easy to build your own translation system.
 
 ## Example
 
@@ -31,9 +33,77 @@ email-cnt = {$cnt ->
 => "Welcome, Noah!"
 
 ;; And their keys can be strings, keywords, or symbols as well
-(i18n/format bundle "email-cnt" {"cnt" 1})
+(i18n/format bundle :email-cnt {"cnt" 1})
 => "1 email"
 
 (i18n/format bundle "email-cnt" {:cnt 2})
 => "2 emails"
+```
+
+## Usage in an actual application
+
+I built this library for a website that uses [Reagent](https://reagent-project.github.io), so I'll share how we do it there.
+
+The translations are stored as both raw text and fluent bundles. During app start, `(load-dictionary! "resources/public/i18n")` is called to load all of the Fluent files. Then on app load, the client sets a `GET` request to the server for the desired translation, and stores it locally with `insert-lang!`. The function `tr` (below) is modeled after [Tempura](https://github.com/taoensso/tempura)'s api, where a fallback value can be passed in with the desired translation: `(i18n/tr :hello)` without fallback, `(i18n/tr [:hello "sup nerd"])` with fallback.
+
+Done in a `.cljc` like this, translations can be tested in a normal clojure repl.
+
+```clojure
+(ns example.i18n
+  (:require
+   [noahtheduke.fluent :as fluent]
+   #?(:cljs
+     [reagent.core :as r])))
+
+(defonce fluent-dictionary
+  #?(:clj (atom nil)
+     :cljs (r/atom {})))
+
+(defn insert-lang! [lang content]
+  (swap! fluent-dictionary assoc lang {:content content
+                                       :ftl (fluent/build lang content)}))
+
+#?(:clj
+   (defn load-dictionary!
+     [dir]
+     (let [langs (->> (io/file dir)
+                      (file-seq)
+                      (filter #(.isFile ^java.io.File %))
+                      (filter #(str/ends-with? (str %) ".ftl"))
+                      (map (fn [^java.io.File f]
+                             (let [n (str/replace (.getName f) ".ftl" "")
+                                   content (slurp f)]
+                               [n content]))))
+           errors (volatile! [])]
+       (doseq [[lang content] langs]
+         (try (insert-lang! lang content)
+              (catch Throwable t
+                (println "Error inserting i18n data for" lang)
+                (println (ex-message t))
+                (vswap! errors conj lang))))
+       @errors)))
+
+(defn get-content
+  [lang]
+  (get-in @fluent-dictionary [lang :content]))
+
+(defn get-bundle
+  [lang]
+  (get-in @fluent-dictionary [lang :ftl]))
+
+(defn get-translation
+  [bundle id params]
+  (when bundle
+    (fluent/format bundle id params)))
+
+(defn tr
+  ([lang resource] (format lang resource nil))
+  ([lang resource params]
+   (let [resource (if (vector? resource) resource [resource])
+         [id fallback] resource]
+     (or (get-translation (get-bundle lang) id params)
+         ;; You can choose to use the fallback directly or use a translation from a different language.
+         ;; Project Fluent's javascript implementation has language negotiation libraries already so those can be used directly as desired.
+         #_ (get-translation (get-bundle "en") id params)
+         fallback))))
 ```
