@@ -18,8 +18,8 @@
   (let [ftl-res (FluentResource. resource)
         errors (.addResource bundle ftl-res)]
     (when (seq errors)
-      (println (ex-info "Errors adding resources:" {:resource resource
-                                                  :errors errors})))
+      (js/console.log (ex-info "Errors adding resources:" {:resource resource
+                                                           :errors errors})))
     bundle))
 
 (defn build
@@ -39,7 +39,7 @@
        (try (.formatPattern bundle v (clj->js args))
             (catch :default e
               (set! (.-message e) (str "Error in id: '" id "'"))
-              (println e)))))))
+              (js/console.log e)))))))
 
 (comment
   (let [input "hello-world = {NUMBER($percent, style: \"percent\")}"
