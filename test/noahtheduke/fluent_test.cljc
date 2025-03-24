@@ -37,7 +37,7 @@ goodbye = Goodbye world!
 (deftest format-test
   (let [bundle (sut/build "en" simple-resource)]
     #?(:clj (testing "throws if asked for the wrong name"
-              (is (thrown-with-msg? #?(:clj Exception :cljs js/Error)
+              (is (thrown-with-msg? Exception
                     #"Missing message for id: 'missing'"
                     (sut/format bundle "missing")))))
     (testing "can handle strings, keywords, and symbols"
@@ -45,13 +45,13 @@ goodbye = Goodbye world!
       (is (= "Hello world!" (sut/format bundle 'hello)))
       (is (= "Hello world!" (sut/format bundle :hello))))
     (testing "can take args"
-      (testing "and requires used args"
-        (is (thrown-with-msg? #?(:clj Exception :cljs js/Error)
-              #"Error in id: 'email-cnt'"
-              (sut/format bundle :email-cnt)))
-        (is (thrown-with-msg? #?(:clj Exception :cljs js/Error)
-              #"Error in id: 'email-cnt'"
-              (sut/format bundle :email-cnt {}))))
+      #?(:clj (testing "and requires used args"
+                (is (thrown-with-msg? Exception
+                      #"Error in id: 'email-cnt'"
+                      (sut/format bundle :email-cnt)))
+                (is (thrown-with-msg? Exception
+                      #"Error in id: 'email-cnt'"
+                      (sut/format bundle :email-cnt {}))))
       (is (= "Welcome, Noah!"(sut/format bundle :welcome {"user" "Noah"})))
       (is (= "0 emails" (sut/format bundle :email-cnt {:cnt 0})))
       (is (= "1 email" (sut/format bundle :email-cnt {:cnt 1})))
