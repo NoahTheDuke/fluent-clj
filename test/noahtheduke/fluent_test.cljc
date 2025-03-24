@@ -51,7 +51,7 @@ goodbye = Goodbye world!
                       (sut/format bundle :email-cnt)))
                 (is (thrown-with-msg? Exception
                       #"Error in id: 'email-cnt'"
-                      (sut/format bundle :email-cnt {}))))
+                      (sut/format bundle :email-cnt {})))))
       (is (= "Welcome, Noah!"(sut/format bundle :welcome {"user" "Noah"})))
       (is (= "0 emails" (sut/format bundle :email-cnt {:cnt 0})))
       (is (= "1 email" (sut/format bundle :email-cnt {:cnt 1})))
