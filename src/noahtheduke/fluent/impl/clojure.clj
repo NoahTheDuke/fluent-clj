@@ -1,4 +1,5 @@
 (ns noahtheduke.fluent.impl.clojure
+  {:no-doc true}
   (:refer-clojure :exclude [format])
   (:require
    [clojure.core :as cc])

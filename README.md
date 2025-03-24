@@ -1,8 +1,11 @@
 # fluent-clj
 
+[![Clojars Project](https://img.shields.io/clojars/v/io.github.noahtheduke/fluent-clj.svg)](https://clojars.org/io.github.noahtheduke/fluent-clj)
+[![cljdoc badge](https://cljdoc.org/badge/io.github.noahtheduke/fluent-clj)](https://cljdoc.org/d/io.github.noahtheduke/fluent-clj)
+
 [Project Fluent](https://projectfluent.org/) is very cool. The available [Java](https://github.com/xyzsd/fluent) and [Javascript](https://github.com/projectfluent/fluent.js) packages are relatively easy to use through interop, but without a unified interface, it's hard to write consistent and testable code.
 
-This library aims to paper over those differences, making it easy to build your own translation system.
+This library aims to smooth over those differences, making it easy to build your own translation system.
 
 ## Example
 
@@ -97,13 +100,13 @@ Done in a `.cljc` like this, translations can be tested in a normal clojure repl
     (fluent/format bundle id params)))
 
 (defn tr
-  ([lang resource] (format lang resource nil))
+  ([lang resource] (tr lang resource nil))
   ([lang resource params]
    (let [resource (if (vector? resource) resource [resource])
          [id fallback] resource]
      (or (get-translation (get-bundle lang) id params)
          ;; You can choose to use the fallback directly or use a translation from a different language.
          ;; Project Fluent's javascript implementation has language negotiation libraries already so those can be used directly as desired.
-         #_ (get-translation (get-bundle "en") id params)
-         fallback))))
+         fallback
+         (get-translation (get-bundle "en") id params)))))
 ```

@@ -1,4 +1,5 @@
 (ns noahtheduke.fluent.impl.clojurescript
+  {:no-doc true}
   (:require
    ["@fluent/bundle" :refer [FluentBundle FluentDateTime FluentNone
                              FluentNumber FluentResource]]))
