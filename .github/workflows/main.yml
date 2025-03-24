@@ -88,4 +88,4 @@ jobs:
         run: npm ci
 
       - name: run node tests
-        run: npx shadow-cljs compile node-test
+        run: npx shadow-cljs compile node-test && node target/shadow-node-test/node-tests.js

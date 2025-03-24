@@ -7,9 +7,16 @@ default:
 @run *args:
     clojure -M:run {{args}}
 
-test-all:
+test-clj:
     clojure -M:dev:test:runner
+
+test-cljs:
     npx shadow-cljs compile node-test
+    node target/shadow-node-test/node-tests.js
+
+test:
+    @just test-clj
+    @just test-cljs
 
 today := `date +%F`
 current_version := `cat resources/FLUENTCLJ_VERSION | xargs`

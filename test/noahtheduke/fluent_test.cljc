@@ -36,10 +36,11 @@ goodbye = Goodbye world!
 
 (deftest format-test
   (let [bundle (sut/build "en" simple-resource)]
-    #?(:clj (testing "throws if asked for the wrong name"
-              (is (thrown-with-msg? Exception
+    (testing "if asked for the wrong name"
+      #?(:clj (is (thrown-with-msg? Exception
                     #"Missing message for id: 'missing'"
-                    (sut/format bundle "missing")))))
+                    (sut/format bundle "missing")))
+         :cljs (is (nil? (sut/format bundle "missing")))))
     (testing "can handle strings, keywords, and symbols"
       (is (= "Hello world!" (sut/format bundle "hello")))
       (is (= "Hello world!" (sut/format bundle 'hello)))
