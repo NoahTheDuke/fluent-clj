@@ -7,6 +7,8 @@
 
 This library aims to smooth over those differences, making it easy to build your own translation system.
 
+Note: Requires Clojure 1.12 because new interop syntax is really nice. I'm not looking to support earlier Clojures at this time.
+
 ## Example
 
 ```clojure
