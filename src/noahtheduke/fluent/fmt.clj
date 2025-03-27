@@ -29,7 +29,7 @@
     Term
     Variant)
    (fluent.syntax.parser FTLParser FTLStream)
-   (java.io StringWriter Writer)
+   (java.io File StringWriter Writer)
    (java.util Optional)
    (noahtheduke.fluent FluentFmt)))
 
@@ -248,7 +248,7 @@
   [{:keys [dir]}]
   (doseq [f (->> (io/file dir)
                  (file-seq)
-                 (filter #(.isFile ^java.io.File %))
+                 (filter #(File/.isFile %))
                  (filter #(str/ends-with? (str %) ".ftl")))
           :let [contents (-> (slurp f)
                              (str/replace #"\\u([0-9A-F]{4})" "__FLUENT_CLJ__u$1")

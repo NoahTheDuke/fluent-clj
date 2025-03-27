@@ -9,6 +9,9 @@ default:
     clojure -T:build javac
     clojure -M:run {{args}}
 
+splint:
+    clojure -M:dev:test:splint
+
 test-clj:
     clojure -T:build javac
     clojure -M:dev:test:runner
