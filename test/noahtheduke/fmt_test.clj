@@ -18,11 +18,9 @@
                  "# A simple hello message"
                  "hello = Hello {$name}!"]
                 (str/join "\n"))
-        out (->> [""
-                  "### Coolest Fluent File around"
+        out (->> ["### Coolest Fluent File around"
                   "## Subsection 1: Greetings"
                   "# A simple hello message"
-                  "hello = Hello {$name}!"
-                  ""]
+                  "hello = Hello {$name}!"]
                  (str/join "\n"))]
     (is (= out (parse-and-fmt in)))))
