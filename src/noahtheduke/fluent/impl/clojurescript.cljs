@@ -1,3 +1,7 @@
+; This Source Code Form is subject to the terms of the Mozilla Public
+; License, v. 2.0. If a copy of the MPL was not distributed with this
+; file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 (ns noahtheduke.fluent.impl.clojurescript
   {:no-doc true}
   (:require
@@ -36,10 +40,7 @@
    (let [id (clj->js id)
          message (.getMessage bundle id)]
      (when-let [v (and message (.-value message))]
-       (try (.formatPattern bundle v (clj->js args))
-            (catch :default e
-              (set! (.-message e) (str "Error in id: '" id "'"))
-              (js/console.log e)))))))
+       (.formatPattern bundle v (clj->js args))))))
 
 (comment
   (let [input "hello-world = {NUMBER($percent, style: \"percent\")}"

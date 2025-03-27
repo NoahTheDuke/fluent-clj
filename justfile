@@ -2,12 +2,15 @@ default:
     @just --list
 
 @repl arg="":
-    clojure -M{{arg}}:repl
+    clojure -T:build javac
+    clojure -M{{arg}}:dev:test:repl
 
 @run *args:
+    clojure -T:build javac
     clojure -M:run {{args}}
 
 test-clj:
+    clojure -T:build javac
     clojure -M:dev:test:runner
 
 test-cljs:

@@ -1,3 +1,7 @@
+; This Source Code Form is subject to the terms of the Mozilla Public
+; License, v. 2.0. If a copy of the MPL was not distributed with this
+; file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 (ns noahtheduke.fluent-test
   (:require
    [clojure.test :refer [deftest is testing]]
@@ -46,13 +50,11 @@ goodbye = Goodbye world!
       (is (= "Hello world!" (sut/format bundle 'hello)))
       (is (= "Hello world!" (sut/format bundle :hello))))
     (testing "can take args"
-      #?(:clj (testing "and requires used args"
-                (is (thrown-with-msg? Exception
-                      #"Error in id: 'email-cnt'"
-                      (sut/format bundle :email-cnt)))
-                (is (thrown-with-msg? Exception
-                      #"Error in id: 'email-cnt'"
-                      (sut/format bundle :email-cnt {})))))
+      (testing "and requires used args"
+        (is (thrown? #?(:clj Exception :cljs js/ReferenceError)
+                     (sut/format bundle :email-cnt)))
+        (is (thrown? #?(:clj Exception :cljs js/ReferenceError)
+                     (sut/format bundle :email-cnt {}))))
       (is (= "Welcome, Noah!"(sut/format bundle :welcome {"user" "Noah"})))
       (is (= "0 emails" (sut/format bundle :email-cnt {:cnt 0})))
       (is (= "1 email" (sut/format bundle :email-cnt {:cnt 1})))

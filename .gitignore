@@ -19,6 +19,7 @@
 /target/
 node_modules
 pom.xml
+pom.properties
 public/js
 .shadow-cljs
 .clj-kondo/.cache

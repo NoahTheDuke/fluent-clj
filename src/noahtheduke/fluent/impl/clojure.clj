@@ -1,3 +1,7 @@
+; This Source Code Form is subject to the terms of the Mozilla Public
+; License, v. 2.0. If a copy of the MPL was not distributed with this
+; file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 (ns noahtheduke.fluent.impl.clojure
   {:no-doc true}
   (:refer-clojure :exclude [format])
@@ -7,44 +11,44 @@
    (fluent.bundle FluentBundle FluentBundle$Builder FluentResource)
    (fluent.functions.cldr CLDRFunctionFactory)
    (fluent.syntax.AST Pattern)
-   (fluent.syntax.parser FTLParser FTLStream ParseException)
+   (fluent.syntax.parser FTLParser FTLStream)
    (java.util Locale Map Optional)))
 
 (set! *warn-on-reflection* true)
 
+(defn parse
+  "Undocumented, useful for tests"
+  ^FluentResource [^String s]
+  (FTLParser/parse (FTLStream/of s) false))
+
 (defn- add-resource-impl
-  ^FluentBundle [^FluentBundle$Builder builder ^FluentResource ftl-res]
+  ^FluentBundle [^FluentBundle$Builder builder ^Locale locale ^FluentResource ftl-res]
   (when (FluentResource/.hasErrors ftl-res)
     (let [errors (FluentResource/.errors ftl-res)
-          err (first errors)
-          locale (java.lang.reflect.Field/.get
-                  (doto (java.lang.Class/.getDeclaredField FluentBundle$Builder "locale")
-                    (java.lang.reflect.Field/.setAccessible true))
-                  builder)]
+          err (first errors)]
       (throw (ex-info (str "Error adding resource: " (ex-message err))
                       {:locale locale
-                       :errors (mapv ex-message errors)}
+                       :errors errors}
                       err))))
     (FluentBundle$Builder/.addResource builder ftl-res)
-    (try (FluentBundle$Builder/.build builder)
-         (catch ParseException ex
-           (println (ex-message ex)))))
+    (FluentBundle$Builder/.build builder))
 
 (defn add-resource
   "Adds a new resource "
   ^FluentBundle [^FluentBundle bundle ^String resource]
-  (let [builder (-> (FluentBundle/builderFrom bundle)
+  (let [locale (FluentBundle/.locale bundle)
+        builder (-> (FluentBundle/builderFrom bundle)
                     (FluentBundle$Builder/.withFunctionFactory
                       CLDRFunctionFactory/INSTANCE))
         ftl-res (FTLParser/parse (FTLStream/of resource))]
-    (add-resource-impl builder ftl-res)))
+    (add-resource-impl builder locale ftl-res)))
 
 (defn build
   ^FluentBundle [^String locale-str ^String resource]
   (let [locale (Locale/forLanguageTag locale-str)
         builder (FluentBundle/builder locale CLDRFunctionFactory/INSTANCE)
         ftl-res (FTLParser/parse (FTLStream/of resource))]
-    (add-resource-impl builder ftl-res)))
+    (add-resource-impl builder locale ftl-res)))
 
 (defn ^:private k->str
   [k]
