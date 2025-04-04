@@ -1,0 +1,14 @@
+{
+    "src/noahtheduke/*.cljc": {
+        "alternate": "test/noahtheduke/{}_test.cljc"
+    },
+    "src/noahtheduke/*.clj": {
+        "alternate": "test/noahtheduke/{}_test.clj"
+    },
+    "test/noahtheduke/*_test.cljc": {
+        "alternate": "src/noahtheduke/{}.cljc"
+    },
+    "test/noahtheduke/*_test.clj": {
+        "alternate": "src/noahtheduke/{}.clj"
+    }
+}

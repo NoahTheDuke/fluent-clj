@@ -1,19 +1,22 @@
 default:
     @just --list
 
-@repl arg="":
+@compile:
     clojure -T:build javac
+
+@repl arg="":
+    just compile
     clojure -M{{arg}}:dev:test:repl
 
 @run *args:
-    clojure -T:build javac
+    just compile
     clojure -M:run {{args}}
 
 splint:
     clojure -M:dev:test:splint
 
 test-clj:
-    clojure -T:build javac
+    just compile
     clojure -M:dev:test:runner
 
 test-cljs:
@@ -23,6 +26,9 @@ test-cljs:
 test:
     @just test-clj
     @just test-cljs
+
+jar:
+    clojure -T:build jar
 
 today := `date +%F`
 current_version := `cat resources/FLUENTCLJ_VERSION | xargs`

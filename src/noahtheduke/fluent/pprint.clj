@@ -2,9 +2,8 @@
 ; License, v. 2.0. If a copy of the MPL was not distributed with this
 ; file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-(ns noahtheduke.fluent.fmt
+(ns noahtheduke.fluent.pprint
   (:require
-   [clojure.java.io :as io]
    [clojure.string :as str])
   (:import
    (fluent.bundle FluentResource)
@@ -28,14 +27,27 @@
     SelectExpression
     Term
     Variant)
-   (fluent.syntax.parser FTLParser FTLStream)
-   (java.io File StringWriter Writer)
-   (java.util Optional)
-   (noahtheduke.fluent FluentFmt)))
+   (java.io StringWriter Writer)
+   (java.util Optional)))
 
 (set! *warn-on-reflection* true)
 
-(defrecord Context [^Writer out ^int indent ^boolean args])
+(defrecord Context [^Writer out ^int indent])
+
+(defprotocol FTLPrinter
+  (-pprint [this ctx]))
+
+(defn pprint
+  "Format and print a Fluent object to *out*."
+  [resource]
+  (-pprint resource (Context/new *out* 0)))
+
+(defn pprint-str
+  "Format and print a Fluent object to a string."
+  [resource]
+  (let [out (StringWriter/new)]
+    (-pprint resource (Context/new out 0))
+    (String/.trim (StringWriter/.toString out))))
 
 (defn write
   [ctx ^String s]
@@ -45,122 +57,120 @@
   [^Context ctx]
   (write ctx (String/.repeat "    " (:indent ctx))))
 
-(defprotocol FTLPrinter
-  (-ftl-print [this ctx]))
-
 (extend-protocol FTLPrinter
   Commentary$Comment
-  (-ftl-print
+  (-pprint
    [this ctx]
-   (write ctx "\n")
    (write ctx "# ")
-   (write ctx (Commentary$Comment/.text this)))
+   (write ctx (Commentary$Comment/.text this))
+   (write ctx "\n\n"))
 
   Commentary$GroupComment
-  (-ftl-print
+  (-pprint
    [this ctx]
    (write ctx "\n")
    (write ctx "## ")
-   (write ctx (Commentary$GroupComment/.text this)))
+   (write ctx (Commentary$GroupComment/.text this))
+   (write ctx "\n\n"))
 
   Commentary$ResourceComment
-  (-ftl-print
+  (-pprint
    [this ctx]
    (write ctx "\n")
    (write ctx "### ")
-   (write ctx (Commentary$ResourceComment/.text this)))
+   (write ctx (Commentary$ResourceComment/.text this))
+   (write ctx "\n\n"))
 
   Literal$StringLiteral
-  (-ftl-print
+  (-pprint
    [this ctx]
    (write ctx "\"")
    (write ctx (Literal$StringLiteral/.value this))
    (write ctx "\""))
 
   Identifier
-  (-ftl-print
+  (-pprint
    [this ctx]
    (write ctx (Identifier/.key this)))
 
   InlineExpression$MessageReference
-  (-ftl-print
+  (-pprint
    [this ctx]
-   (-ftl-print (InlineExpression$MessageReference/.identifier this) ctx))
+   (-pprint (InlineExpression$MessageReference/.identifier this) ctx))
 
   InlineExpression$TermReference
-  (-ftl-print
+  (-pprint
    [this ctx]
    (write ctx "-")
-   (-ftl-print (InlineExpression$TermReference/.identifier this) ctx)
+   (-pprint (InlineExpression$TermReference/.identifier this) ctx)
    (when-let [attr (Optional/.orElse (InlineExpression$TermReference/.attributeID this) nil)]
-     (-ftl-print attr ctx))
+     (write ctx ".")
+     (-pprint attr ctx))
    (when-let [args (Optional/.orElse (InlineExpression$TermReference/.arguments this) nil)]
      (let [positional (CallArguments/.positional args)
-           named (CallArguments/.named args)
-           ctx (assoc ctx :args true)]
+           named (CallArguments/.named args)]
        (write ctx "(")
        (->> (concat positional named)
             (interpose ", ")
             (run! (fn [arg] (if (string? arg)
                               (write ctx arg)
-                              (-ftl-print arg ctx)))))
+                              (-pprint arg ctx)))))
        (write ctx ")"))))
 
   InlineExpression$FunctionReference
-  (-ftl-print
+  (-pprint
    [this ctx]
-   (-ftl-print (InlineExpression$FunctionReference/.identifier this) ctx)
+   (-pprint (InlineExpression$FunctionReference/.identifier this) ctx)
    (when-let [args (Optional/.orElse (InlineExpression$FunctionReference/.arguments this) nil)]
      (let [positional (CallArguments/.positional args)
-           named (CallArguments/.named args)
-           ctx (assoc ctx :args true)]
+           named (CallArguments/.named args)]
        (write ctx "(")
        (->> (concat positional named)
             (interpose ", ")
             (run! (fn [arg] (if (string? arg)
                               (write ctx arg)
-                              (-ftl-print arg ctx)))))
+                              (-pprint arg ctx)))))
        (write ctx ")"))))
 
   NamedArgument
-  (-ftl-print
+  (-pprint
    [this ctx]
-   (-ftl-print (NamedArgument/.name this) ctx)
+   (-pprint (NamedArgument/.name this) ctx)
    (write ctx ": ")
-   (-ftl-print (NamedArgument/.value this) ctx))
+   (-pprint (NamedArgument/.value this) ctx))
 
   InlineExpression$VariableReference
-  (-ftl-print
+  (-pprint
    [this ctx]
    (write ctx "$")
-   (-ftl-print (InlineExpression$VariableReference/.identifier this) ctx))
+   (-pprint (InlineExpression$VariableReference/.identifier this) ctx))
 
   Variant
-  (-ftl-print
+  (-pprint
    [this ctx]
    (when (Variant/.isDefault this)
      (write ctx "*"))
    (write ctx "[")
-   (-ftl-print (Variant/.keyable this) ctx)
+   (-pprint (Variant/.keyable this) ctx)
    (write ctx "] ")
-   (-ftl-print (Variant/.value this) ctx))
+   (-pprint (Variant/.value this) ctx))
 
   SelectExpression
-  (-ftl-print
+  (-pprint
    [this ctx]
-   (-ftl-print (SelectExpression/.selector this) ctx)
+   (-pprint (SelectExpression/.selector this) ctx)
    (write ctx " ->")
    (write ctx "\n")
    (run! (fn [variant]
            (indent ctx)
-           (-ftl-print variant ctx)
+           (-pprint variant ctx)
            (write ctx "\n"))
          (SelectExpression/.variants this))
    (let [ctx (update ctx :indent #(max 0 (unchecked-dec %)))]
      (indent ctx)))
 
   PatternElement$TextElement
-  (-ftl-print
+  (-pprint
    [this ctx]
    (let [s (PatternElement$TextElement/.value this)]
      (write ctx s)
@@ -168,112 +178,67 @@
        (indent ctx))))
 
   PatternElement$Placeable
-  (-ftl-print
+  (-pprint
    [this ctx]
    (write ctx "{")
-   (-ftl-print (PatternElement$Placeable/.expression this) ctx)
+   (-pprint (PatternElement$Placeable/.expression this) ctx)
    (write ctx "}"))
 
   Pattern
-  (-ftl-print
+  (-pprint
    [this ctx]
    (let [ctx (update ctx :indent inc)]
-     (run! (fn [pat] (-ftl-print pat ctx)) (Pattern/.elements this))))
+     (run! (fn [pat] (-pprint pat ctx)) (Pattern/.elements this))))
 
   Attribute
-  (-ftl-print
+  (-pprint
    [this ctx]
    (let [ctx (update ctx :indent inc)]
      (indent ctx)
      (write ctx ".")
-     (-ftl-print (Attribute/.identifier this) ctx)
+     (-pprint (Attribute/.identifier this) ctx)
      (write ctx " = ")
-     (-ftl-print (Attribute/.pattern this) ctx)
+     (-pprint (Attribute/.pattern this) ctx)
      (write ctx "\n")))
 
   Term
-  (-ftl-print
+  (-pprint
    [this ctx]
    (Optional/.ifPresent (Term/.comment this)
                         (fn [cmnt]
-                          (-ftl-print cmnt ctx)
+                          (write ctx "\n# ")
+                          (write ctx (Commentary$Comment/.text cmnt))
                           (write ctx "\n")))
    (write ctx "-")
-   (-ftl-print (Term/.identifier this) ctx)
+   (-pprint (Term/.identifier this) ctx)
    (write ctx " = ")
-   (-ftl-print (Term/.value this) ctx)
+   (-pprint (Term/.value this) ctx)
    (when-let [attrs (not-empty (Term/.attributes this))]
      (write ctx "\n")
-     (run! (fn [attr] (-ftl-print attr ctx)) attrs))
+     (run! (fn [attr] (-pprint attr ctx)) attrs))
    (write ctx "\n"))
 
   Message
-  (-ftl-print
+  (-pprint
    [this ctx]
    (Optional/.ifPresent (Message/.comment this)
                         (fn [cmnt]
-                          (-ftl-print cmnt ctx)
+                          (write ctx "\n# ")
+                          (write ctx (Commentary$Comment/.text cmnt))
                           (write ctx "\n")))
-   (-ftl-print (Message/.identifier this) ctx)
+   (-pprint (Message/.identifier this) ctx)
    (write ctx " = ")
    (Optional/.ifPresent (Message/.pattern this)
                         (fn [pat]
-                          (-ftl-print pat ctx)))
+                          (-pprint pat ctx)))
    (when-let [attrs (not-empty (Message/.attributes this))]
      (write ctx "\n")
-     (run! (fn [attr] (-ftl-print attr ctx)) attrs))
+     (run! (fn [attr] (-pprint attr ctx)) attrs))
    (write ctx "\n"))
 
   FluentResource
-  (-ftl-print
+  (-pprint
    [this ctx]
    (let [entries (FluentResource/.entries this)]
      (doseq [entry entries]
-       (-ftl-print entry ctx)))))
-
-(defn fmt->string
-  "Format and print to a string"
-  [resource]
-  (let [out (StringWriter/new)]
-    (-ftl-print resource (->Context out 0 false))
-    (str/trim (str out))))
-
-(defn fmt->print
-  "Format and print to *out*"
-  [resource]
-  (-ftl-print resource (->Context *out* 0 false)))
-
-(defn fmt->file
-  "Format all files in a directory"
-  [{:keys [dir]}]
-  (doseq [f (->> (io/file dir)
-                 (file-seq)
-                 (filter #(File/.isFile %))
-                 (filter #(str/ends-with? (str %) ".ftl")))
-          :let [contents (-> (slurp f)
-                             (str/replace #"\\u([0-9A-F]{4})" "__FLUENT_CLJ__u$1")
-                             (str/replace #"\\U([0-9A-F]{4})" "__FLUENT_CLJ__U$1"))
-                ast (FTLParser/parse (FTLStream/of contents) false)
-                formatted-file (-> (with-out-str (fmt->string ast))
-                                   (str/replace #"__FLUENT_CLJ__u([0-9A-F]{4})" "\\\\u$1")
-                                   (str/replace #"__FLUENT_CLJ__U([0-9A-F]{4})" "\\\\U$1")
-                                   (str/trim)
-                                   (str "\n"))]]
-    (spit f formatted-file)))
-
-(comment
-  (fmt->file {:dir "corpus"}))
-
-(comment
-  (require '[criterium.core :as c])
-  (let [f (slurp "corpus/Russian_ru.ftl")
-        ast (FTLParser/parse (FTLStream/of f) false)]
-    (assert (= (str/trim (with-out-str (fmt->print ast)))
-               (str/trim (FluentFmt/printToString ast))))
-    ; (spit "clj-fmt.ftl" (ftl-string ast))
-    ; (spit "java-fmt.ftl" (FluentFmt/printToString ast))
-    (println "clj print")
-    (c/quick-bench (fmt->string ast))
-    (println "java print")
-    (c/quick-bench (FluentFmt/printToString ast))
-    ))
+       (-pprint entry ctx)))))

@@ -9,7 +9,12 @@
  {:dev {:extra-paths ["dev"]
         :extra-deps {criterium/criterium {:mvn/version "0.4.6"}
                      com.clojure-goes-fast/clj-java-decompiler {:mvn/version "0.3.7"}
-                     virgil/virgil {:mvn/version "0.3.2"}}}
+                     com.clojure-goes-fast/clj-memory-meter {:mvn/version "0.4.0"}
+                     virgil/virgil {:mvn/version "0.3.2"}
+                     zprint/zprint {:mvn/version "1.2.4"}
+                     opticlj/opticlj {:mvn/version "1.0.0-alpha10"}
+                     nubank/matcher-combinators {:mvn/version "3.9.1"}}
+        :jvm-opts ["-Djdk.attach.allowAttachSelf"]}
 
   :test {:extra-paths ["test"]}
 

@@ -7,7 +7,9 @@
    [clojure.java.io :as io]
    [clojure.string :as str]
    [clojure.tools.build.api :as b]
-   [deps-deploy.deps-deploy :as dd]))
+   [deps-deploy.deps-deploy :as dd]) 
+  (:import
+    [java.io File]))
 
 (defn make-version []
   (str/trim (slurp "./resources/FLUENTCLJ_VERSION")))
@@ -27,6 +29,7 @@
             :src-dirs ["src"]
             :java-src-dirs ["src"]
             :resource-dirs ["resources"]
+            :javac-opts ["--release" "17"]
             :pom-data [[:licenses
                         [:license [:name "MPL-2.0"] [:url "https://mozilla.org/MPL/2.0"]]]]}
            opts)))
@@ -42,11 +45,16 @@
 
 (defn javac [opts]
   (let [opts (make-opts opts)]
-    (println "Compiling" (str/join ", " (:java-src-dirs opts)))
-    (b/javac {:src-dirs (:java-src-dirs opts)
-              :class-dir (:class-dir opts)
-              :basis (:basis opts)
-              :javac-opts (:javac-opts opts)})))
+    (when (->> (map io/file (:java-src-dirs opts))
+               (mapcat file-seq)
+               (filter #(and (.isFile ^File %)
+                             (str/ends-with? (str %) ".java")))
+               (seq))
+      (println "Compiling" (str/join ", " (:java-src-dirs opts)))
+      (b/javac {:src-dirs (:java-src-dirs opts)
+                :class-dir (:class-dir opts)
+                :basis (:basis opts)
+                :javac-opts (:javac-opts opts)}))))
 
 (defn jar [opts]
   (let [opts (make-opts opts)]

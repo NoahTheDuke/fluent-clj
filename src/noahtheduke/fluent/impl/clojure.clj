@@ -18,14 +18,14 @@
 
 (defn parse
   "Undocumented, useful for tests"
+  {:no-doc true}
   ^FluentResource [^String s]
   (FTLParser/parse (FTLStream/of s) false))
 
 (defn- add-resource-impl
   ^FluentBundle [^FluentBundle$Builder builder ^Locale locale ^FluentResource ftl-res]
-  (when (FluentResource/.hasErrors ftl-res)
-    (let [errors (FluentResource/.errors ftl-res)
-          err (first errors)]
+  (when-let [errors (seq (FluentResource/.errors ftl-res))]
+    (let [err (first errors)]
       (throw (ex-info (str "Error adding resource: " (ex-message err))
                       {:locale locale
                        :errors errors}
@@ -40,14 +40,14 @@
         builder (-> (FluentBundle/builderFrom bundle)
                     (FluentBundle$Builder/.withFunctionFactory
                       CLDRFunctionFactory/INSTANCE))
-        ftl-res (FTLParser/parse (FTLStream/of resource))]
+        ftl-res (parse resource)]
     (add-resource-impl builder locale ftl-res)))
 
 (defn build
   ^FluentBundle [^String locale-str ^String resource]
   (let [locale (Locale/forLanguageTag locale-str)
         builder (FluentBundle/builder locale CLDRFunctionFactory/INSTANCE)
-        ftl-res (FTLParser/parse (FTLStream/of resource))]
+        ftl-res (parse resource)]
     (add-resource-impl builder locale ftl-res)))
 
 (defn ^:private k->str
