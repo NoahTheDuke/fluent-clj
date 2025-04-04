@@ -367,8 +367,8 @@
         parsed (parse s)
         f (slurp "corpus/Russian_ru.ftl")
         f-parsed (parse f)]
-    (prn f-parsed)
-    (prn (fluent->edn f-parsed))
+    ; (prn f-parsed)
+    ; (prn (fluent->edn f-parsed))
     (assert (= (fluent->edn parsed)
                (fluent->edn (edn->fluent (fluent->edn parsed)))
                (fluent->edn (edn->fluent (fluent->edn (edn->fluent (fluent->edn parsed)))))))

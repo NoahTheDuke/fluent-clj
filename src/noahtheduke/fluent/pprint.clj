@@ -242,3 +242,17 @@
    (let [entries (FluentResource/.entries this)]
      (doseq [entry entries]
        (-pprint entry ctx)))))
+
+(comment
+  (require '[noahtheduke.fluent.impl.clojure :refer [parse]])
+  (let [f (slurp "corpus/Russian_ru.ftl")
+        parsed (parse f)]
+    (assert (empty? (FluentResource/.errors (parse (pprint-str parsed))))
+            (FluentResource/.errors (parse (pprint-str parsed))))
+    ; (pprint-str parsed)
+    ; (prn f-parsed)
+    ; (prn (pprint-str f-parsed))
+    (assert (= (pprint-str parsed)
+               (pprint-str (parse (pprint-str parsed)))
+               (pprint-str (parse (pprint-str (parse (pprint-str parsed)))))))
+    ))
