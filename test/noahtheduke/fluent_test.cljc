@@ -51,10 +51,14 @@ goodbye = Goodbye world!
       (is (= "Hello world!" (sut/format bundle :hello))))
     (testing "can take args"
       (testing "and requires used args"
-        (is (thrown? #?(:clj Exception :cljs js/ReferenceError)
-                     (sut/format bundle :email-cnt)))
-        (is (thrown? #?(:clj Exception :cljs js/ReferenceError)
-                     (sut/format bundle :email-cnt {}))))
+        (is (thrown-with-msg?
+              #?(:clj Exception :cljs js/ReferenceError)
+              #"Missing expected keys: \$cnt"
+              (sut/format bundle :email-cnt)))
+        (is (thrown-with-msg?
+              #?(:clj Exception :cljs js/ReferenceError)
+              #"Missing expected keys: \$cnt"
+              (sut/format bundle :email-cnt {}))))
       (is (= "Welcome, Noah!"(sut/format bundle :welcome {"user" "Noah"})))
       (is (= "0 emails" (sut/format bundle :email-cnt {:cnt 0})))
       (is (= "1 email" (sut/format bundle :email-cnt {:cnt 1})))

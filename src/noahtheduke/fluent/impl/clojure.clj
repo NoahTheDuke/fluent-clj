@@ -6,13 +6,20 @@
   {:no-doc true}
   (:refer-clojure :exclude [format])
   (:require
-   [clojure.core :as cc])
+   [clojure.core :as cc]
+   [clojure.string :as str])
   (:import
    (fluent.bundle FluentBundle FluentBundle$Builder FluentResource)
+   [fluent.bundle.resolver ReferenceException]
+   (fluent.functions FluentFunctionException)
    (fluent.functions.cldr CLDRFunctionFactory)
    (fluent.syntax.AST Pattern)
    (fluent.syntax.parser FTLParser FTLStream)
-   (java.util Locale Map Optional)))
+   (java.util
+    ArrayList
+    Locale
+    Map
+    Optional)))
 
 (set! *warn-on-reflection* true)
 
@@ -64,19 +71,30 @@
    (when bundle
      (let [id (k->str id)
            args (if args (update-keys args k->str) {})
-           pattern (FluentBundle/.getMessagePattern bundle id)]
-       (if (Optional/.isEmpty pattern)
+           pattern (Optional/.orElse (FluentBundle/.getMessagePattern bundle id) nil)
+           errors (ArrayList.)]
+       (if pattern
+         (let [ret (FluentBundle/.formatPattern bundle ^Pattern pattern ^Map args ^ArrayList errors)]
+           (if (seq errors)
+             (let [new-msg (mapv #(cond (instance? ReferenceException %)
+                                        (-> (ex-message %)
+                                            (str/replace "Unknown variable: " "Missing expected keys: "))
+                                        (instance? FluentFunctionException %)
+                                        (-> (ex-message %)
+                                            ((fn [s] (str "Function " s)))))
+                                 errors)]
+               (throw (ex-info (cc/format "Error(s) in id \"%s\": %s" id new-msg)
+                               {:id id
+                                :args args
+                                :errors (vec errors)})))
+             ret))
          (throw (ex-info (cc/format "Missing message for id: '%s'" id) {:id id
-                                                                        :args args}))
-         (as-> (Optional/.get pattern) $
-           (FluentBundle/.formatPattern bundle ^Pattern $ ^Map args)
-           (Optional/.orElseThrow $
-            (fn [] (ex-info (cc/format "Error in id: '%s'" id) {:id id
-                                                                :args args})))))))))
+                                                                        :args args})))))))
 
 (comment
   (let [input "hello-world = {NUMBER($percent, style:\"percent\")}"
         bundle (build "en" input)]
-    (println (format bundle "hello-world" {:percent 0.8
+    (println (format bundle "hello-world" {:ercent 0.8
                                            :style "percent"}))
-    #_(println (format bundle :hello-user {:uer-name "Noah"}))))
+    #_(println (format bundle :hello-user {:uer-name "Noah"})))
+  )

@@ -6,7 +6,8 @@
   {:no-doc true}
   (:require
    ["@fluent/bundle" :refer [FluentBundle FluentDateTime FluentNone
-                             FluentNumber FluentResource]]))
+                             FluentNumber FluentResource]]
+   [clojure.string :as str]))
 
 (defn custom-functions [_locale-str]
   {:NUMBER (fn NUMBER
@@ -40,7 +41,12 @@
    (let [id (clj->js id)
          message (.getMessage bundle id)]
      (when-let [v (and message (.-value message))]
-       (.formatPattern bundle v (clj->js args))))))
+       (try (.formatPattern bundle v (clj->js args))
+            (catch js/ReferenceError e
+              (let [msg (-> (ex-message e)
+                            (str/replace "Unknown variable: " "Missing expected keys: "))]
+                (set! (.-message e) msg)
+                (throw e))))))))
 
 (comment
   (let [input "hello-world = {NUMBER($percent, style: \"percent\")}"

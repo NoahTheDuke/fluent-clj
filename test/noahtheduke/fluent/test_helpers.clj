@@ -22,12 +22,11 @@
 
 (defn promote
   [_arg]
-  (prn _arg)
   (doseq [err-file (->> (file-seq (io/file (:dir @optic/system*)))
                         (filter #(str/ends-with? (str %) ".err.clj")))
-          :let [file (io/file (str/replace (str err-file) ".err.clj" ".clj"))
-                _ (prn file)]
+          :let [file (io/file (str/replace (str err-file) ".err.clj" ".clj"))]
           :when (File/.exists file)]
     (optic.file/rename file err-file)))
 
-(promote nil)
+(comment
+  (promote nil))
