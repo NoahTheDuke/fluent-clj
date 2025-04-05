@@ -4,7 +4,7 @@
             [matcher-combinators.test :refer [match?]]
             [noahtheduke.fluent.impl.clojure :refer [parse]]))
 
-(defn parse-to-edn
+(defn parse-into-edn
   [s]
   (sut/fluent->edn (parse s)))
 
@@ -18,7 +18,7 @@
                  :pattern {:type :ast/pattern
                            :elements [{:type :ast/text-element
                                        :value "1"}]}}]}
-              (parse-to-edn "message = 1")))
+              (parse-into-edn "message = 1")))
   (is (match? {:type :ast/resource
                :entries
                [{:type :ast/message
@@ -29,7 +29,7 @@
                  :pattern {:type :ast/pattern
                            :elements [{:type :ast/text-element
                                        :value "1"}]}}]}
-              (parse-to-edn "# hello\nmessage = 1")))
+              (parse-into-edn "# hello\nmessage = 1")))
   (is (match? {:type :ast/resource
                :entries
                [{:type :ast/message
@@ -48,7 +48,7 @@
                                                                  :key "available"}}}
                                       {:type :ast/text-element
                                        :value " MU unused"}]}}]}
-              (parse-to-edn "game_mu-count = {$unused} of {$available} MU unused")))
+              (parse-into-edn "game_mu-count = {$unused} of {$available} MU unused")))
   (is (match? {:type :ast/resource
                :entries
                [{:type :ast/message
@@ -98,7 +98,7 @@
                                                                                 :key "facedown"}}}
                                                      {:type :ast/text-element
                                                       :value " face-down."}]}}]}}]}}]}
-              (parse-to-edn "game_face-down-count = {$total ->
+              (parse-into-edn "game_face-down-count = {$total ->
     [one] {$total} card, {$facedown} face-down.
     *[other] {$total} cards, {$facedown} face-down.
 }"))))

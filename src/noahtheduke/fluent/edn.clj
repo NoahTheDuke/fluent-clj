@@ -64,8 +64,8 @@
 
 (defmethod -to-edn ParseException
   [resource]
-  (let [ch (.getDeclaredField ParseException "ch")
-        arg (.getDeclaredField ParseException "arg")]
+  (let [ch (Class/.getDeclaredField ParseException "ch")
+        arg (Class/.getDeclaredField ParseException "arg")]
     (Field/.setAccessible ch true)
     (Field/.setAccessible arg true)
     {:type :exception/parse
@@ -225,7 +225,7 @@
 
 (defmethod -from-edn :exception/parse
   [resource]
-  (let [create (.getDeclaredMethod ParseException "create" (into-array [ParseException$ErrorCode String Integer/TYPE String]))]
+  (let [create (Class/.getDeclaredMethod ParseException "create" (into-array [ParseException$ErrorCode String Integer/TYPE String]))]
     (Method/.setAccessible create true)
     (Method/.invoke create
                     ParseException
@@ -360,6 +360,7 @@
    (mapv -from-edn (:errors resource))
    (mapv -from-edn (:junk resource))))
 
+#_:clj-kondo/ignore
 (comment
   (require '[noahtheduke.fluent.impl.clojure :refer [parse]]
            '[clj-memory-meter.core :as mm])

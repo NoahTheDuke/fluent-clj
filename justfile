@@ -15,6 +15,13 @@ default:
 splint:
     clojure -M:dev:test:splint
 
+lsp:
+    clojure-lsp diagnostics
+
+lint:
+    just splint
+    just lsp
+
 test-clj:
     just compile
     clojure -M:dev:test:runner

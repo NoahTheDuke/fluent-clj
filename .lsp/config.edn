@@ -1,0 +1,1 @@
+{:paths-ignore-regex ["test/__optic__/.*"]}
