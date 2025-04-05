@@ -4,7 +4,7 @@
    [noahtheduke.fluent.impl.clojure :refer [parse]]
    [noahtheduke.fluent.pprint :as sut]
    [noahtheduke.fluent.test-helpers :refer [defcram]]
-   [opticlj.core :as optic :refer [defoptic]]))
+   ))
 
 (defn parse-and-print
   [s]
@@ -34,9 +34,6 @@
 
 (defcram big-russian-cram
   (parse-and-print-str (slurp "corpus/Russian_ru.ftl")))
-
-(comment
-  (optic/adjust-all!))
 
 (deftest roundtripping-test
   (let [s "game_face-down-count = {$total ->
