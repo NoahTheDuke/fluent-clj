@@ -16,12 +16,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Prepare java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: ${{ matrix.java }}
-
       - name: Setup clojure-lsp
         uses: clojure-lsp/setup-clojure-lsp@v1
         with:
@@ -49,7 +43,6 @@ jobs:
 
       - name: tests
         run: |
-          clojure -T:build javac
           clojure -M:dev:test:runner
 
   build-cljs:
