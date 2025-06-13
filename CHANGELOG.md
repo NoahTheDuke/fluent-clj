@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 0.1.0
+
+Released on 2025-06-13.
+
 - Add an opinionated, no options formatter.
 - Clean up build.clj.
 - Bump net.xyzsd.fluent/fluent-base to 0.72.

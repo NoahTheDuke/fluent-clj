@@ -26,7 +26,7 @@ This library aims to smooth over those differences, making it easy to build your
 Add it to your deps.edn or project.clj:
 
 ```clojure
-{:deps {io.github.noahtheduke/fluent-clj {:mvn/version "0.0.2"}}}
+{:deps {io.github.noahtheduke/fluent-clj {:mvn/version "0.1.0"}}}
 ```
 
 ## Usage
