@@ -1,15 +1,13 @@
 default:
     @just --list
 
-@compile:
-    clojure -T:build javac
+@gen-docs:
+    markdown-toc -i --maxdepth 2 README.md
 
 @repl arg="":
-    just compile
     clojure -M{{arg}}:dev:test:repl
 
 @run *args:
-    just compile
     clojure -M:run {{args}}
 
 splint:
@@ -23,7 +21,6 @@ lint:
     just lsp
 
 test-clj:
-    just compile
     clojure -M:dev:test:runner
 
 test-cljs:
@@ -53,7 +50,7 @@ current_version := `cat resources/FLUENTCLJ_VERSION | xargs`
 # Builds the uberjar, builds the jar, sends the jar to clojars
 @release version:
     echo 'Running tests'
-    just test-all
+    just test
     echo 'Setting new version {{version}}'
     just set-version {{version}}
     echo 'Commit and tag'

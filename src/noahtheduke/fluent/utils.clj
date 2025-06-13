@@ -13,29 +13,27 @@
    [java.io File]))
 
 (defn safe-read-and-fmt
-  ^String [s]
-  (let [contents (-> s
-                     (str/replace #"\\u([0-9A-F]{4})" "__FLUENT_CLJ__u$1")
-                     (str/replace #"\\U([0-9A-F]{4})" "__FLUENT_CLJ__U$1"))
-        ast (parse contents)
-        _ (when-let [errors (seq (FluentResource/.errors ast))]
-            (throw (ex-info (str "found errors: " (ex-message (last errors))) {:errors errors})))
-        formatted-contents (-> (pprint-str ast)
-                               (str/replace #"__FLUENT_CLJ__u([0-9A-F]{4})" "\\\\u$1")
-                               (str/replace #"__FLUENT_CLJ__U([0-9A-F]{4})" "\\\\U$1")
-                               (str/trim)
-                               (str "\n"))]
-    formatted-contents))
+  ^String [contents]
+  (let [ast (parse contents)]
+    (when-let [errors (seq (FluentResource/.errors ast))]
+      (throw (ex-info (str "found errors: " (ex-message (last errors))) {:errors errors})))
+    (-> (pprint-str ast)
+        (str/trim)
+        (str "\n"))))
 
-(defn fmt-dir
-  "Format all files in a directory"
-  [{:keys [dir]}]
-  (doseq [f (->> (io/file (name dir))
-                 (file-seq)
-                 (filter #(File/.isFile %))
-                 (filter #(str/ends-with? (str %) ".ftl")))
-          :let [formatted-file (safe-read-and-fmt (slurp f))]]
-    (spit f formatted-file)))
+(defn fmt
+  "Format files in :dir or single file at :file. No-op if given neither."
+  [{:keys [dir file]}]
+  (cond
+    dir (doseq [f (->> (io/file (name dir))
+                       (file-seq)
+                       (filter #(File/.isFile %))
+                       (filter #(str/ends-with? (str %) ".ftl")))
+                :let [formatted-file (safe-read-and-fmt (slurp f))]]
+          (spit f formatted-file))
+    file (as-> (slurp file) $
+           (safe-read-and-fmt $)
+           (spit file $))))
 
 (comment
-  (fmt-dir {:dir "corpus"}))
+  (fmt {:dir "corpus"}))

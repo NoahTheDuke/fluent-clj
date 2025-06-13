@@ -10,6 +10,17 @@ This library aims to smooth over those differences, making it easy to build your
 > [!NOTE]
 > Requires Clojure 1.12 because new interop syntax is really nice. I'm not looking to support earlier Clojures at this time.
 
+## Table of Contents
+
+<!-- toc -->
+
+- [Getting Started](#getting-started)
+- [Usage](#usage)
+- [Formatter](#formatter)
+- [Extended example](#extended-example)
+
+<!-- tocstop -->
+
 ## Getting Started
 
 Add it to your deps.edn or project.clj:
@@ -18,7 +29,7 @@ Add it to your deps.edn or project.clj:
 {:deps {io.github.noahtheduke/fluent-clj {:mvn/version "0.0.2"}}}
 ```
 
-## Example
+## Usage
 
 ```clojure
 (require '[noahtheduke.fluent :as i18n])
@@ -54,7 +65,11 @@ email-cnt = {$cnt ->
 => "2 emails"
 ```
 
-## Usage in an actual application
+## Formatter
+
+A no-options formatter for Fluent Files is included, available as a `-X` function. To use it, call `clojure -X noahtheduke.fluent.utils/fmt :file "corpus/example.ftl"` to format a single file or `clojure -X noahtheduke.fluent.utils/fmt :dir "corpus"` to format all `.ftl` files in the given directory.
+
+## Extended example
 
 I built this library for a website that uses [Reagent](https://reagent-project.github.io), so I'll share how we do it there.
 

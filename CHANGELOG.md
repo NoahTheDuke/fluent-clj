@@ -2,10 +2,11 @@
 
 ## Unreleased
 
-- Revert swallowing cljs reference errors. (See [official forums](https://discourse.mozilla.org/t/which-tools-are-available-for-finding-errors-in-ftl-files/70313/2) for reasoning.)
+- Add an opinionated, no options formatter.
+- Clean up build.clj.
+- Bump net.xyzsd.fluent/fluent-base to 0.72.
 - Bump @fluent/bundle to 0.19.
-- Add Clojure and Java formatters. Clojure is more idiomatic, Java is twice as fast. 500us vs 250us for a 2k file.
-- Clean up build.clj, add prep task.
+- Revert swallowing cljs reference errors. (See [official forums](https://discourse.mozilla.org/t/which-tools-are-available-for-finding-errors-in-ftl-files/70313/2) for reasoning.)
 
 ## 0.0.2
 

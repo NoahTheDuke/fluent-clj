@@ -7,9 +7,7 @@
    [clojure.java.io :as io]
    [clojure.string :as str]
    [clojure.tools.build.api :as b]
-   [deps-deploy.deps-deploy :as dd]) 
-  (:import
-    [java.io File]))
+   [deps-deploy.deps-deploy :as dd]))
 
 (defn make-version []
   (str/trim (slurp "./resources/FLUENTCLJ_VERSION")))
@@ -29,7 +27,6 @@
             :src-dirs ["src"]
             :java-src-dirs ["src"]
             :resource-dirs ["resources"]
-            :javac-opts ["--release" "17"]
             :pom-data [[:licenses
                         [:license [:name "MPL-2.0"] [:url "https://mozilla.org/MPL/2.0"]]]]}
            opts)))
@@ -43,23 +40,9 @@
     (b/copy-dir {:src-dirs (concat (:src-dirs opts) (:resource-dirs opts))
                  :target-dir (:class-dir opts)})))
 
-(defn javac [opts]
-  (let [opts (make-opts opts)]
-    (when (->> (map io/file (:java-src-dirs opts))
-               (mapcat file-seq)
-               (filter #(and (.isFile ^File %)
-                             (str/ends-with? (str %) ".java")))
-               (seq))
-      (println "Compiling" (str/join ", " (:java-src-dirs opts)))
-      (b/javac {:src-dirs (:java-src-dirs opts)
-                :class-dir (:class-dir opts)
-                :basis (:basis opts)
-                :javac-opts (:javac-opts opts)}))))
-
 (defn jar [opts]
   (let [opts (make-opts opts)]
     (copy-src opts)
-    (javac opts)
     (b/jar opts)
     (println "Created" (str (b/resolve-path (:jar-file opts))))))
 
@@ -71,7 +54,6 @@
 (defn uberjar [opts]
   (let [opts (make-opts opts)]
     (copy-src opts)
-    (javac opts)
     (b/write-pom opts)
     (b/compile-clj opts)
     (b/uber opts)
@@ -81,7 +63,6 @@
   (let [opts (make-opts opts)]
     (clean opts)
     (copy-src opts)
-    (javac opts)
     (b/write-pom opts)
     (b/jar opts)
     (dd/deploy {:installer :remote
