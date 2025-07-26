@@ -45,7 +45,9 @@ email-cnt = {$cnt ->
 }")
 => #'sample-resource
 
-;; Bundles are native objects that hold the processed Fluent strings. They can be interacted with through interop but generally you only need the provided api functions.
+;; Bundles are native objects that hold the processed Fluent strings. They can
+;; be interacted with through interop but generally you only need the provided
+;; api functions.
 (def bundle (i18n/build "en" sample-resource))
 => #'bundle
 
