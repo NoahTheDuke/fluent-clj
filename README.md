@@ -133,8 +133,10 @@ Done in a `.cljc` like this, translations can be tested in a normal clojure repl
    (let [resource (if (vector? resource) resource [resource])
          [id fallback] resource]
      (or (get-translation (get-bundle lang) id params)
-         ;; You can choose to use the fallback directly or use a translation from a different language.
-         ;; Project Fluent's javascript implementation has language negotiation libraries already so those can be used directly as desired.
+         ;; You can choose to use the fallback directly or use a translation
+         ;; from a different language. Project Fluent's javascript
+         ;; implementation has language negotiation libraries already so those
+         ;; can be used directly as desired.
          fallback
          (get-translation (get-bundle "en") id params)))))
 ```
