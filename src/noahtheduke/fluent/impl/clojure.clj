@@ -37,8 +37,8 @@
                       {:locale locale
                        :errors errors}
                       err))))
-    (FluentBundle$Builder/.addResource builder ftl-res)
-    (FluentBundle$Builder/.build builder))
+  (FluentBundle$Builder/.addResource builder ftl-res)
+  (FluentBundle$Builder/.build builder))
 
 (defn add-resource
   "Adds a new resource "
