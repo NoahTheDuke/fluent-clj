@@ -63,7 +63,7 @@ email-cnt = {$cnt ->
 (i18n/format bundle :email-cnt {"cnt" 1})
 => "1 email"
 
-(i18n/format bundle "email-cnt" {:cnt 2})
+(i18n/format bundle 'email-cnt {'cnt 2})
 => "2 emails"
 ```
 
@@ -130,8 +130,7 @@ Done in a `.cljc` like this, translations can be tested in a normal clojure repl
 (defn tr
   ([lang resource] (tr lang resource nil))
   ([lang resource params]
-   (let [resource (if (vector? resource) resource [resource])
-         [id fallback] resource]
+   (let [[id fallback] (if (vector? resource) resource [resource])]
      (or (get-translation (get-bundle lang) id params)
          ;; You can choose to use the fallback directly or use a translation
          ;; from a different language. Project Fluent's javascript

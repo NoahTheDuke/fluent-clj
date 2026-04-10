@@ -59,10 +59,10 @@ goodbye = Goodbye world!
               #?(:clj Exception :cljs js/ReferenceError)
               #"Missing expected keys: \$cnt"
               (sut/format bundle :email-cnt {}))))
-      (is (= "Welcome, Noah!"(sut/format bundle :welcome {"user" "Noah"})))
+      (is (= "Welcome, Noah!" (sut/format bundle :welcome {"user" "Noah"})))
       (is (= "0 emails" (sut/format bundle :email-cnt {:cnt 0})))
       (is (= "1 email" (sut/format bundle :email-cnt {:cnt 1})))
-      (is (= "2 emails" (sut/format bundle :email-cnt {:cnt 2})))
-      (is (= "100 emails" (sut/format bundle :email-cnt {:cnt 100})))
+      (is (= "2 emails" (sut/format bundle 'email-cnt {'cnt 2})))
+      (is (= "100 emails" (sut/format bundle "email-cnt" {"cnt" 100})))
       (testing "and ignores extra args"
         (is (= "1 email" (sut/format bundle :email-cnt {:cnt 1 :extra :arg})))))))
