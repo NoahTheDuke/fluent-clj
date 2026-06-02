@@ -13,13 +13,8 @@
    [fluent.bundle.resolver ReferenceException]
    (fluent.functions FluentFunctionException)
    (fluent.functions.cldr CLDRFunctionFactory)
-   (fluent.syntax.AST Pattern)
    (fluent.syntax.parser FTLParser FTLStream)
-   (java.util
-    ArrayList
-    Locale
-    Map
-    Optional)))
+   (java.util ArrayList Locale Optional)))
 
 (set! *warn-on-reflection* true)
 
@@ -30,7 +25,7 @@
   (FTLParser/parse (FTLStream/of s) false))
 
 (defn- add-resource-impl
-  ^FluentBundle [^FluentBundle$Builder builder ^Locale locale ^FluentResource ftl-res]
+  ^FluentBundle [builder locale ftl-res]
   (when-let [errors (seq (FluentResource/.errors ftl-res))]
     (let [err (first errors)]
       (throw (ex-info (str "Error adding resource: " (ex-message err))
@@ -42,7 +37,7 @@
 
 (defn add-resource
   "Adds a new resource "
-  ^FluentBundle [^FluentBundle bundle ^String resource]
+  ^FluentBundle [bundle resource]
   (let [locale (FluentBundle/.locale bundle)
         builder (-> (FluentBundle/builderFrom bundle)
                     (FluentBundle$Builder/.withFunctionFactory
@@ -51,7 +46,7 @@
     (add-resource-impl builder locale ftl-res)))
 
 (defn build
-  ^FluentBundle [^String locale-str ^String resource]
+  ^FluentBundle [locale-str resource]
   (let [locale (Locale/forLanguageTag locale-str)
         builder (FluentBundle/builder locale CLDRFunctionFactory/INSTANCE)
         ftl-res (parse resource)]
@@ -65,36 +60,49 @@
         :else (throw (ex-info (cc/format "Given wrong type: '%s', expected string or keyword" (type k))
                               {:key k}))))
 
+(defn ^:private get-pattern
+  [bundle k]
+  (let [id (k->str k)
+        ?patt (if-let [idx (str/index-of id ".")]
+                (let [id' (subs id 0 idx)
+                      attr (subs id (unchecked-inc idx))]
+                  (when (str/index-of attr ".")
+                    (throw (ex-info (str "Invalid attribute provided: " attr)
+                                    {:id id :attr attr})))
+                  (FluentBundle/.getAttributePattern bundle id' attr))
+                (FluentBundle/.getMessagePattern bundle id))]
+    (Optional/.orElse ?patt nil)))
+
 (defn format
   (^String [bundle id] (format bundle (k->str id) nil))
-  (^String [^FluentBundle bundle id args]
+  (^String [bundle id args]
    (when bundle
-     (let [id (k->str id)
-           args (if args (update-keys args k->str) {})
-           pattern (Optional/.orElse (FluentBundle/.getMessagePattern bundle id) nil)
-           errors (ArrayList.)]
-       (if pattern
-         (let [ret (FluentBundle/.formatPattern bundle ^Pattern pattern ^Map args ^ArrayList errors)]
-           (if (seq errors)
-             (let [new-msg (mapv #(cond (instance? ReferenceException %)
-                                        (-> (ex-message %)
-                                            (str/replace "Unknown variable: " "Missing expected keys: "))
-                                        (instance? FluentFunctionException %)
-                                        (-> (ex-message %)
-                                            ((fn [s] (str "Function " s)))))
-                                 errors)]
-               (throw (ex-info (cc/format "Error(s) in id \"%s\": %s" id new-msg)
-                               {:id id
-                                :args args
-                                :errors (vec errors)})))
-             ret))
-         (throw (ex-info (cc/format "Missing message for id: '%s'" id) {:id id
-                                                                        :args args})))))))
+     (if-let [pattern (get-pattern bundle id)]
+       (let [args (if args (update-keys args k->str) {})
+             errors (ArrayList.)
+             ret (FluentBundle/.formatPattern bundle pattern args errors)]
+         (if (seq errors)
+           (let [new-msg (mapv #(cond (instance? ReferenceException %)
+                                      (-> (ex-message %)
+                                          (str/replace "Unknown variable: " "Missing expected keys: "))
+                                      (instance? FluentFunctionException %)
+                                      (-> (ex-message %)
+                                          ((fn [s] (str "Function " s)))))
+                               errors)]
+             (throw (ex-info (cc/format "Error(s) in id \"%s\": %s" id new-msg)
+                             {:id id
+                              :args args
+                              :errors (vec errors)})))
+           ret))
+       (throw (ex-info (cc/format "Missing message for id: '%s'" id) {:id id
+                                                                      :args args}))))))
 
 (comment
-  (let [input "hello-world = {NUMBER($percent, style:\"percent\")}"
+  (let [input "
+hello-world = {NUMBER($percent, style:\"percent\")}
+    .goodbye = goodbye {$name}
+"
         bundle (build "en" input)]
-    (println (format bundle "hello-world" {:ercent 0.8
-                                           :style "percent"}))
+    (println (format bundle "hello-world.goodbye" {:name "noah"}))
     #_(println (format bundle :hello-user {:uer-name "Noah"})))
   )

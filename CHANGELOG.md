@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Support selecting message attributes with dotted id: `(format bundle :base.attr)`
+- Bump @fluent/bundle to 0.19.1.
+
 ## 0.1.0
 
 Released on 2025-06-13.

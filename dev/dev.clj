@@ -4,6 +4,9 @@
 
 #_:splint/disable
 (ns dev
-  (:require virgil))
+  (:require virgil
+            [clj-async-profiler.core :as prof]))
 
 (virgil/watch-and-recompile ["src"])
+
+(prof/serve-ui 8080)

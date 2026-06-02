@@ -8,6 +8,7 @@
    #?(:cljs ["@fluent/bundle" :refer [FluentBundle]])
    [noahtheduke.fluent :as sut])
   #?(:clj (:import
+           (clojure.lang ExceptionInfo)
            (fluent.bundle FluentBundle))))
 
 #?(:clj (set! *warn-on-reflection* true))
@@ -25,6 +26,8 @@ email-cnt = {$cnt ->
 (def second-resource
   "
 goodbye = Goodbye world!
+  .attr = Goodbye attr!
+  .named = Goodbye {$name}!
 ")
 
 (deftest build-test
@@ -36,7 +39,12 @@ goodbye = Goodbye world!
   (let [original (sut/build "en" simple-resource)
         with-extra (sut/add-resource original second-resource)]
     (is (instance? FluentBundle with-extra))
-    (is (= "Goodbye world!" (sut/format with-extra :goodbye)))))
+    (is (= "Goodbye world!" (sut/format with-extra :goodbye)))
+    (is (= "Goodbye attr!" (sut/format with-extra :goodbye.attr)))
+    (is (= "Goodbye noah!" (sut/format with-extra :goodbye.named {:name "noah"})))
+    (is (thrown-with-msg? ExceptionInfo
+          #"Invalid attribute provided: attr.attr2"
+          (sut/format with-extra :goodbye.attr.attr2)))))
 
 (deftest format-test
   (let [bundle (sut/build "en" simple-resource)]
