@@ -54,7 +54,9 @@ current_version := `cat resources/FLUENTCLJ_VERSION | xargs`
     echo 'Setting new version {{version}}'
     just set-version {{version}}
     echo 'Commit and tag'
-    git commit -a -m 'Bump version for release'
+    jj commit -m 'Bump version for release'
+    jj b a
+    git switch main
     git tag v{{version}}
     echo 'Pushing to github'
     git push
