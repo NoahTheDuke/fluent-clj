@@ -52,7 +52,11 @@ goodbye = Goodbye world!
       #?(:clj (is (thrown-with-msg? Exception
                     #"Missing message for id: 'missing'"
                     (sut/format bundle "missing")))
-         :cljs (is (nil? (sut/format bundle "missing")))))
+         :cljs (is (nil? (sut/format bundle "missing"))))
+      #?(:clj (is (thrown-with-msg? Exception
+                    #"Missing message for id: 'missing.attr'"
+                    (sut/format bundle "missing.attr")))
+         :cljs (is (nil? (sut/format bundle "missing.attr")))))
     (testing "can handle strings, keywords, and symbols"
       (is (= "Hello world!" (sut/format bundle "hello")))
       (is (= "Hello world!" (sut/format bundle 'hello)))

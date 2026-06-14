@@ -37,6 +37,9 @@ jar:
 today := `date +%F`
 current_version := `cat resources/FLUENTCLJ_VERSION | xargs`
 
+@version:
+    echo {{current_version}}
+
 # Set version, change all instances of <<next>> to version
 @set-version version:
     echo '{{version}}' > resources/FLUENTCLJ_VERSION

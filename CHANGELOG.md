@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Fix `message.attr` access in cljs.
+
 ## 0.2.0
 
 Released on 2026-06-03.

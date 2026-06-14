@@ -46,7 +46,8 @@
                   (when (str/index-of attr ".")
                     (throw (ex-info (str "Invalid attribute provided: " attr)
                                     {:id id :attr attr})))
-                  (o/get (.-attributes (.getMessage bundle id')) attr))
+                  (when-let [msg (.getMessage bundle id')]
+                    (o/get (.-attributes msg) attr)))
                 (.getMessage bundle id))]
     ?patt))
 
