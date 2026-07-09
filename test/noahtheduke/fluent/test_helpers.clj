@@ -18,7 +18,8 @@
     `(do (optic/defoptic ~kw [~@body])
          (deftest ~test-name
            (optic/run ~kw)
-           (is (optic/check (get-in @optic/system* [:optics ~kw])))))))
+           (let [check-result# (optic/check (get-in @optic/system* [:optics ~kw]))]
+             (is check-result#))))))
 
 (defn promote
   [_arg]

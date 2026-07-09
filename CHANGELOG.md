@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Unify formatting with existing [fluent.js](https://github.com/projectfluent/fluent.js/blob/9a925d2a38b893be735ff4429be8ad62132a204d/fluent-syntax/src/serializer.ts) behavior.
+
 ## 0.3.0
 
 Released on 2026-06-13.

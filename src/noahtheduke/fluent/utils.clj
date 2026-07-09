@@ -13,26 +13,26 @@
    [java.io File]))
 
 (defn safe-read-and-fmt
-  ^String [contents]
+  ^String [contents sort]
   (let [ast (parse contents)]
     (when-let [errors (seq (FluentResource/.errors ast))]
       (throw (ex-info (str "found errors: " (ex-message (last errors))) {:errors errors})))
-    (-> (pprint-str ast)
+    (-> (pprint-str ast {:sort? sort})
         (str/trim)
         (str "\n"))))
 
 (defn fmt
   "Format files in :dir or single file at :file. No-op if given neither."
-  [{:keys [dir file]}]
+  [{:keys [dir file sort]}]
   (cond
     dir (doseq [f (->> (io/file (name dir))
                        (file-seq)
                        (filter #(File/.isFile %))
                        (filter #(str/ends-with? (str %) ".ftl")))
-                :let [formatted-file (safe-read-and-fmt (slurp f))]]
+                :let [formatted-file (safe-read-and-fmt (slurp f) sort)]]
           (spit f formatted-file))
     file (as-> (slurp file) $
-           (safe-read-and-fmt $)
+           (safe-read-and-fmt $ sort)
            (spit file $))))
 
 (comment

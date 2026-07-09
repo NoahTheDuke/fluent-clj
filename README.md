@@ -69,7 +69,51 @@ email-cnt = {$cnt ->
 
 ## Formatter
 
-A no-options formatter for Fluent Files is included, available as a `-X` function. To use it, call `clojure -X noahtheduke.fluent.utils/fmt :file "corpus/example.ftl"` to format a single file or `clojure -X noahtheduke.fluent.utils/fmt :dir "corpus"` to format all `.ftl` files in the given directory.
+A formatter for Fluent Files is available as a `-X` function. To use it, call `clojure -X noahtheduke.fluent.utils/fmt :file "corpus/example.ftl"` to format a single file or `clojure -X noahtheduke.fluent.utils/fmt :dir "corpus"` to format all `.ftl` files in the given directory. Passing `:sort true` will sort the file as well: comments are left untouched, all terms and messages between comments are sorted by their case-insensitive name and separated by a single blank line.
+
+```fluent
+### file comment
+-beta = Beta
+alpha = Alpha
+## section 1
+Greeting = Hello
+another-greeting = Hi
+
+
+## section 2
+## formatting stays intact, e.g. multiple    spaces
+
+message = Example message
+another-message = {$sel ->
+   *[a] AAA
+        BBB
+}
+```
+
+becomes
+
+```fluent
+### file comment
+
+alpha = Alpha
+-beta = Beta
+
+## section 1
+
+another-greeting = Hi
+Greeting = Hello
+
+## section 2
+## formatting stays intact, e.g. multiple    spaces
+
+another-message =
+    { $sel ->
+       *[a]
+            AAA
+            BBB
+    }
+message = Example message
+```
 
 ## Extended example
 
